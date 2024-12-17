@@ -1,0 +1,57 @@
+name: Build and Release Extension
+
+on:
+  push:
+    branches:
+      - main # Trigger on commits to the 'main' branch
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Required to create and upload releases
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      # Step 3: Install dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # Step 4: Read version from package.json
+      - name: Get Version
+        id: version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      # Step 5: Build and Package Extension
+      - name: Build and Package Extension
+        run: |
+          mkdir -p releases
+          npm run package
+          cp releases/xtouch-pro-ext.zip releases/xtouch-pro-ext-v${VERSION}.zip
+
+      # Step 6: Create a GitHub Release
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          body: |
+            **Automated Release**
+            - Version: ${{ env.VERSION }}
+            - Commit: ${{ github.sha }}
+            - Triggered by commit on branch 'main'.
+          files: |
+            releases/xtouch-pro-ext.zip
+            releases/xtouch-pro-ext-v${{ env.VERSION }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,13 @@
+{
+  "name": "xtouch-pro-ext",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "mkdir -p dist && cp -r src/* dist/",
+    "package": "npm run clean && npm run build && cd dist && zip -r ../releases/xtouch-pro-ext.zip . && npm run clean"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
